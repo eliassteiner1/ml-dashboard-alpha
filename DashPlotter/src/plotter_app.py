@@ -6,7 +6,8 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import time, os, sys
 import numpy as np
-import matplotlib.colors as mcolors
+from utils import adjust_alpha
+
 import threading
 import torch
 
@@ -185,7 +186,7 @@ class DashPlotter():
                             y    = [None],
                             line = dict(color = opt[key]["C"], width = 0, shape = "spline", smoothing = smoothing),
                             fill = "tonexty",
-                            fillcolor = self._adjust_alpha(opt[key]["C"], 0.25),
+                            fillcolor = adjust_alpha(opt[key]["C"], 0.25),
                             showlegend = False,
                             legendgroup = f"group{i}",
                             hoverinfo   = "none",
@@ -214,10 +215,10 @@ class DashPlotter():
                         x    = [None],
                         y    = [None],
                         marker = dict(
-                            color    = [self._adjust_alpha(opt[key]["C"], 0), opt[key]["C"]], 
+                            color    = [adjust_alpha(opt[key]["C"], 0), opt[key]["C"]], 
                             size     = [10, 4],
                             gradient = dict(
-                                color = [self._adjust_alpha(opt[key]["C"], 0.9), opt[key]["C"]], 
+                                color = [adjust_alpha(opt[key]["C"], 0.9), opt[key]["C"]], 
                                 type  = ["radial", "radial"]),
                             line     = dict(width = [0, 0]),
                         ),
@@ -1053,22 +1054,6 @@ class DashPlotter():
         
         return app
       
-    def _adjust_alpha(self, color: str, adjust_a: float):
-        """Takes a css "color name", "rgb(r, g, b)", or "rgba(r, g, b, a)" string and outputs the color in "rgba" format
-        with 0.1 times the alpha value."""
-        
-        if color.startswith("rgb"):
-            components = color[color.index("(")+1:color.index(")")].split(",")
-            r, g, b    = map(int, components[:3])  # Extract RGB components
-            a          = float(components[3]) if len(components) == 4 else 1.0  # a assumed to be 1.0 if not provided
-        else:
-            # Assume it's a CSS color name
-            r, g, b = [int(c * 255) for c in mcolors.to_rgb(color)]
-            a = 1.0
-
-        a *= adjust_a
-        a = max(0, min(a, 1)) # Ensure alpha stays in range [0, 1]
-        return f"rgba({r}, {g}, {b}, {a:.3f})"
     
     
          
