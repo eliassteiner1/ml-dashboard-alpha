@@ -1,0 +1,135 @@
+/* Override card background color */
+
+/* Apply global font type and color */
+html, body {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-ligatures: contextual;
+}
+
+body {
+    background-color: rgb(101, 95, 115);
+}
+
+.card {
+    background-color: rgb(20, 20, 20);
+    border-radius: 8px;
+    box-shadow: 0 0 16px 2px rgba(0, 0, 0, 0.8);
+}
+
+.card-header {
+    text-align: left;
+    color: rgb(200, 200, 200);
+    font-size: 14px;
+    font-weight: 800;
+
+}
+
+.card-body {
+    text-align: left;
+    color: rgb(200, 200, 200);
+    font-size: 14px;
+    font-weight: 500;
+
+}
+
+.card-footer {
+    text-align: left;
+    color: rgb(200, 200, 200);
+    font-size: 14px;
+    font-weight: 800;
+
+}
+
+.card-header + .card-body {
+    /* 0=0rem, 1=0.25rem, 2=0.5rem, 3=1rem, 4=1.5rem, 5=3rem*/
+    border-top: 2px solid rgb(101, 95, 115);
+}
+
+/* .card-body + .card-footer {
+    0=0rem, 1=0.25rem, 2=0.5rem, 3=1rem, 4=1.5rem, 5=3rem
+    border-top: 2px solid rgb(101, 95, 115);
+} */
+
+/* Slider container */
+.rc-slider {
+    margin-top      : 0px; /* Space above the slider */
+    margin-bottom   : 0px; /* Space below the slider */
+    margin-left     : 10px;
+    margin-right    : 10px;
+
+    position        : relative;
+    width           : calc(100% - 20px); /* shrink the "functional range" slightly to make handle not move as far */
+    height          : 20px; /* set this to match the rail and slider height (this defines total box height */
+}
+
+.rc-slider-rail { /* Slider rail (background line) */
+    position        : absolute;
+    width           : calc(100% + 20px); /* then expand the rail slightly to accomodate the handle fully */
+    height          : 20px;
+    background-color: lightgray;
+    border-radius   : 2px;
+    
+    left            : -10px;           /* offset rail to center and account for width change */
+    bottom          : 50%;             /* This is a must to have the rail centered vertically */
+    transform       : translateY(50%); /* This is a must to have the rail centered vertically */
+}
+
+.rc-slider-track { /* Slider track (active section of the rail) */
+    display         : none;
+    position        : absolute;
+    width           : 100%;
+    height          : 0px; /* Thickness matches the rail */
+    background-color: rgb(89, 212, 104);
+
+    bottom          : 50%;             /* This is a must to have the rail centered vertically */
+    transform       : translateY(50%); /* This is a must to have the rail centered vertically */
+}
+
+/* Slider handle (thumb) */
+.rc-slider-handle {
+    position        : absolute;
+    width           : 15px; /* Size of the handle */
+    height          : 15px; /* Size of the handle */
+    background-color: rgb(153, 97, 227);
+    border-radius   : 2px; /* Make it circular */
+
+    margin-bottom   : 0px;
+    margin-top      : 0px;
+    margin-left     : 0px;
+    margin-right    : 0px;
+
+    bottom          : 2.5px; /* set this to (slider height - handle height) / 2 */
+    border          : 0px solid rgb(200, 200, 200); /* Optional: Add border for contrast */
+}
+
+.rc-slider-step {
+    position        : absolute;
+    height          : 0px; /* this is incredibly important to make the anchor point for the dots predictable */
+    bottom          : 50%; /* this makes the childs (dots) much easier to align */
+}
+
+/* Slider dots (step indicators) */
+.rc-slider-dot {
+    position        : absolute;
+    width           : 1px; /* Size of the dots */
+    height          : 12px; /* Size of the dots */
+    background-color: #b017366d;
+    border-radius   : 0%; /* Make dots circular */
+
+    margin-bottom   : 0px; /* set all the margins to 0 otherwise they have some weird default values */
+    margin-top      : 0px;
+    margin-left     : 0px;
+    margin-right    : 0px;
+
+    bottom          : 0px;                  /* set anchor point at bottom */
+    transform       : translate(-50%, 50%); /* this actually centers the dot marks horizontally and vertically */
+    border          : 0px solid #ffffff;  /* Optional: Add border for contrast */
+}
+
+/* Active dot styling */
+.rc-slider-dot-active {
+    background-color: #1636a969; /* Highlight active dots */
+}
+
+
+
