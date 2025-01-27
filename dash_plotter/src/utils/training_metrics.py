@@ -43,6 +43,17 @@ def calc_network_info(net: nn.Module, opt: torch.optim.Optimizer):
     return grad_norm**0.5, eff_LR_norm**0.5, eff_udrate**0.5
 
 
+
+
+
+def calc_net_nparams(net: nn.Module):
+    """calculates the number of parameters in a network"""
+    n_params = 0
+    for p in net.parameters():
+        n_params += torch.numel(p)
+        
+    return n_params
+
 def calc_net_gradnorm(net: nn.Module):
     """just calculates the gradient norm of a network. Call before gradients have been zeroed!"""
     grad_norm = 0

@@ -1,4 +1,4 @@
-from dash_plotter_3.src.dash_app_3 import DashPlotter
+from dash_plotter import DashPlotter
 import time
 
 PLOTTER = DashPlotter()
