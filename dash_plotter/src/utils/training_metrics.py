@@ -42,7 +42,16 @@ def calc_network_info(net: nn.Module, opt: torch.optim.Optimizer):
 
     return grad_norm**0.5, eff_LR_norm**0.5, eff_udrate**0.5
 
-def calc_network_weightnorm(net: nn.Module):
+
+def calc_net_gradnorm(net: nn.Module):
+    """just calculates the gradient norm of a network. Call before gradients have been zeroed!"""
+    grad_norm = 0
+    for p in net.parameters():
+        grad_norm += torch.sum(p.grad**2)
+    
+    return grad_norm**0.5
+
+def calc_net_weightnorm(net: nn.Module):
     """just calculates the parameter weight norm of a network"""
     weight_norm = 0
     for p in net.parameters():
