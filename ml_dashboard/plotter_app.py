@@ -5,6 +5,7 @@ import os
 import sys
 import threading
 import time
+from   collections import deque
 # third-party library imports
 import numpy as np
 import torch
@@ -81,7 +82,9 @@ class DashPlotter:
         store[f"g{4}_PV_x"][:, 0] = np.linspace(0, 1, n_steps) # debug
         
         # add additional information    
-        store["proc_speed"] = None          
+        store["proc_speed"] = deque(maxlen=10) 
+        store["proc_speed_t0"] = None
+        store["proc_speed_t1"] = None        
 
         return store
     
@@ -1050,10 +1053,12 @@ class DashPlotter:
         )
         def upate_proc_speed(n):
             proc_speed = self._store["proc_speed"]
-            if proc_speed is None:
+            
+            if len(proc_speed) == 0:
                 return "---------- samples/sec"
-            formatted_speed = f"{proc_speed:,.2f} sampes/sec".replace(",", "'")
-            return formatted_speed
+            
+            avg_speed = sum(proc_speed) / len(proc_speed)
+            return f"{avg_speed:,.2f} sampes/sec".replace(",", "'")
         
         
         return app
@@ -1081,14 +1086,50 @@ class DashPlotter:
             self._store[f"g{graph}_t{trace}_lo"].append(y-lo)
             self._store[f"g{graph}_t{trace}_hi"].append(y+hi)
     
+    def batchtimer(self, action: str, batch_size: int = None):
+        
+        if action not in ["start", "stop", "read"]:
+            raise ValueError(f"only 'start', 'stop' and 'read' allowed as action! (got {action})")
+        
+        if action == "start": # starts the timer
+            self._store["proc_speed_t0"] = time.time()
+            self._store["proc_speed_t1"] = None
+        
+        if action == "stop": # stops the timer and adds recorded time as proc speed to store (for card 5)
+            self._store["proc_speed_t1"] = time.time()
+            if self._store["proc_speed_t0"] is None:
+                raise ValueError("start time for batchtimer was not set!")
+            if self._store["proc_speed_t0"] >= self._store["proc_speed_t1"]:
+                raise ValueError(f"got t0: {self._store["proc_speed_t0"]} and t1: {self._store["proc_speed_t1"]}!")
+            if batch_size is None:
+                raise ValueError(f"please specify a batch size when stopping the timer!")
+            
+            self._store["proc_speed"].append(batch_size / (self._store["proc_speed_t1"] - self._store["proc_speed_t0"]))
+            self._store["proc_speed_t0"] = None
+            self._store["proc_speed_t1"] = None
+        
+        if action == "read":
+            if len(self._store["proc_speed"]) == 0:
+                print("warning: there have been no processing speed timings yet!")
+                return 0
+            else:
+                return sum(self._store["proc_speed"]) / len(self._store["proc_speed"])
+
     def reset_data(self):
         for key in self._store.keys():
+            
             if "ymax" in key or "ymin" in key:
                 self._store[key] = 0
                 continue
+            
             if "proc_speed" in key:
-                self._store[key] = None
+                if ("t0" in key) or ("t1" in key):
+                    self._store[key] = None
+                    continue
+                
+                self._store[key] = deque(maxlen=10)  
                 continue
+            
             if "g4" in key:
                 if "LL_Z" in key:
                     self._store[key][:, :, :] = 1

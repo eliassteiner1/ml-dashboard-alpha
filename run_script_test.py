@@ -50,8 +50,7 @@ if __name__ == "__main__":
                 "title"     : "PCA stuff",
                 "n_steps"   : 25,
                 "LL_resol"  : 16,
-                "n_pvalues" : 20,
-                
+                "n_pvalues" : 20,   
             },
         },
     }
@@ -77,7 +76,7 @@ if __name__ == "__main__":
         PLOTTER.add_data(graph=3, trace=1, x=i, y=Nr())
         PLOTTER.add_data(graph=3, trace=2, x=i, y=Nr())
         
-        PLOTTER._store["proc_speed"] = np.random.rand() * 100_000
+        PLOTTER._store["proc_speed"].append(np.random.rand() * 100_000)
                 
         i += 1
         
