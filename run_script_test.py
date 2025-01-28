@@ -1,11 +1,3 @@
-from dash_plotter import DashPlotter
-import time
+from dash_plotter import DashPlotter, calc_net_gradnorm, calc_net_nparams, calc_net_weightnorm
 
-PLOTTER = DashPlotter()
-PLOTTER.run_script()
-
-print("doing more work!")
-print("and more")
-time.sleep(1)
-
-PLOTTER.run_script_spin()
+print("done!")
