@@ -1,5 +1,3 @@
-/* Override card background color */
-
 /* Apply global font type and color */
 html, body {
     font-family: 'JetBrains Mono', monospace;
@@ -37,7 +35,6 @@ body {
     color: rgb(200, 200, 200);
     font-size: 14px;
     font-weight: 800;
-
 }
 
 .card-header + .card-body {
@@ -60,8 +57,6 @@ body {
 .bold-text {
     font-weight: 800;
 }
-
-
 
 /* Slider container */
 .rc-slider {
@@ -144,5 +139,12 @@ body {
     background-color: #1636a969; /* Highlight active dots */
 }
 
+
+/* Dropdown Styling (this actually worked)*/
+/* .Select-placeholder, .Select-value-label {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+} */
 
 
