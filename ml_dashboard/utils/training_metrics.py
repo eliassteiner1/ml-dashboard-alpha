@@ -7,6 +7,7 @@ def calc_net_nparams(net: nn.Module, only_trainable: bool = False) -> int:
     
     if not isinstance(net, nn.Module):
         raise TypeError(f"net must be an instance of nn.Module, got {type(net).__name__} instead.")
+    
     if only_trainable is True:
         return sum(torch.numel(p) for p in net.parameters() if p.requires_grad is True)
     else:
@@ -17,6 +18,7 @@ def calc_net_weightnorm(net: nn.Module, only_trainable: bool = False) -> float:
     
     if not isinstance(net, nn.Module):
         raise TypeError(f"net must be an instance of nn.Module, got {type(net).__name__} instead.")
+    
     with torch.no_grad():
         if only_trainable is True:
             return (sum(torch.sum(p**2) for p in net.parameters() if p.requires_grad is True)**0.5).item()
@@ -28,54 +30,57 @@ def calc_net_gradnorm(net: nn.Module) -> torch.Tensor:
     
     if not isinstance(net, nn.Module):
         raise TypeError(f"net must be an instance of nn.Module, got {type(net).__name__} instead.")
+    
     with torch.no_grad():
         grad_norm = sum(torch.sum(p.grad**2) for p in net.parameters() if p.grad is not None)**0.5
+    
     if grad_norm == 0:
         raise ValueError("No gradients found in the network. Ensure backward() is called before this function.")
+    
     return grad_norm.item()
 
+def calc_adam_rates(net: nn.Module, opt: torch.optim.Optimizer) -> tuple[float, float]:
+    """calculate the effective update rate and effective learning rate for an adam optimizer"""
+    
+    if not isinstance(net, nn.Module):
+        raise TypeError(f"net must be an instance of nn.Module, got {type(net).__name__} instead.")
+    if not isinstance(opt, torch.optim.Adam):
+        raise TypeError("The optimizer must be an instance of torch.optim.Adam")
 
-
-def calc_network_info(net: nn.Module, opt: torch.optim.Optimizer):
-    """
-    calculate the effective update rate by getting the effective LR for each param and then multiplying this LR with the gradient for each parameter.
+    eff_lr_norm  = 0.0
+    eff_udr_norm = 0.0
     
-    outputs all at once for ADAM optimizer: gradient norm, eff. LR norm and eff. updaterate norm
-    """
-    
-    n_params    = 0
-    grads       = []
-    eff_LRs     = []
-    grad_norm   = 0
-    eff_LR_norm = 0
-    eff_udrate  = 0
-    
-    # grab all gradient tensors
-    for p in net.parameters():
-        grads.append(p.grad)
-        n_params += torch.numel(p)
-    
-    # grab all effective LR tensors
-    beta1, beta2 = opt.state_dict()["param_groups"][0]["betas"]
+    # extract all the optimizer parameters
+    BETA1, BETA2 = opt.state_dict()["param_groups"][0]["betas"]
     LR           = opt.state_dict()["param_groups"][0]["lr"]
-    epsilon      = opt.state_dict()["param_groups"][0].get("eps", 10**-8)
-    for key, value in opt.state_dict()["state"].items():
-        step    = value["step"]
-        m1      = value["exp_avg"]
-        m2      = value["exp_avg_sq"]
-        m1_corr = m1 / (1 - beta1**step)
-        m2_corr = m2 / (1 - beta2**step)
-        eff_LR  = (LR * m1_corr) / (torch.sqrt(m2_corr) + epsilon)
-        eff_LRs.append(eff_LR)
+    EPSILON      = opt.state_dict()["param_groups"][0].get("eps", 10**-8)
+    state        = opt.state_dict()["state"] # contains all the information for each param
+        
+    key_idx = 0
+    for p in net.parameters():
+        if (p.requires_grad is False) or (p.grad is None):
+            key_idx += 1
+            continue
+ 
+        state_v = state[key_idx]
+        step    = state_v["step"]
+        m1      = state_v["exp_avg"]
+        m2      = state_v["exp_avg_sq"]
+        m1_corr = m1 / (1 - BETA1**step) # makes momentum really big at the beginning (when step is small)
+        m2_corr = m2 / (1 - BETA2**step) # makes momentum really big at the beginning (when step is small)
+        
+        eff_lr  = (LR * m1_corr) / (torch.sqrt(m2_corr) + EPSILON) # epsilon just for numerical stability
+        eff_udr = p.grad * eff_lr
+        
+        eff_lr_norm  += torch.sum(eff_lr**2)
+        eff_udr_norm += torch.sum(eff_udr**2)
+        
+        key_idx += 1
+        
+    if (eff_lr_norm == 0) or (eff_udr_norm == 0):
+        raise ValueError("no gradients or optimizer state found!")
     
-    # calculate effective update rate, grad norm and effective LR
-    for grad, eff_LR in zip(grads, eff_LRs): # TODO: check if grads and eff_LRs match up!
-        grad_norm   += torch.sum(grad**2)
-        eff_LR_norm += torch.sum(eff_LR**2)
-        eff_udrate  += torch.sum((grad * eff_LR)**2)
-
-    return grad_norm**0.5, eff_LR_norm**0.5, eff_udrate**0.5
-
+    return (eff_lr_norm**0.5).item(), (eff_udr_norm**0.5).item()
 
 
 
