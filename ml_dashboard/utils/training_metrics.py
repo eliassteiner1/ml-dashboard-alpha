@@ -2,6 +2,40 @@ import torch
 import torch.nn as nn
 
 
+def calc_net_nparams(net: nn.Module, only_trainable: bool = False) -> int:
+    """calculates the number of parameters in a network"""
+    
+    if not isinstance(net, nn.Module):
+        raise TypeError(f"net must be an instance of nn.Module, got {type(net).__name__} instead.")
+    if only_trainable is True:
+        return sum(torch.numel(p) for p in net.parameters() if p.requires_grad is True)
+    else:
+        return sum(torch.numel(p) for p in net.parameters())
+
+def calc_net_weightnorm(net: nn.Module, only_trainable: bool = False) -> float:
+    """just calculates the parameter weight norm of a network"""
+    
+    if not isinstance(net, nn.Module):
+        raise TypeError(f"net must be an instance of nn.Module, got {type(net).__name__} instead.")
+    with torch.no_grad():
+        if only_trainable is True:
+            return (sum(torch.sum(p**2) for p in net.parameters() if p.requires_grad is True)**0.5).item()
+        else:
+            return (sum(torch.sum(p**2) for p in net.parameters())**0.5).item()
+        
+def calc_net_gradnorm(net: nn.Module) -> torch.Tensor:
+    """just calculates the gradient norm of a network. Call before gradients have been zeroed!"""
+    
+    if not isinstance(net, nn.Module):
+        raise TypeError(f"net must be an instance of nn.Module, got {type(net).__name__} instead.")
+    with torch.no_grad():
+        grad_norm = sum(torch.sum(p.grad**2) for p in net.parameters() if p.grad is not None)**0.5
+    if grad_norm == 0:
+        raise ValueError("No gradients found in the network. Ensure backward() is called before this function.")
+    return grad_norm.item()
+
+
+
 def calc_network_info(net: nn.Module, opt: torch.optim.Optimizer):
     """
     calculate the effective update rate by getting the effective LR for each param and then multiplying this LR with the gradient for each parameter.
@@ -46,26 +80,4 @@ def calc_network_info(net: nn.Module, opt: torch.optim.Optimizer):
 
 
 
-def calc_net_nparams(net: nn.Module):
-    """calculates the number of parameters in a network"""
-    n_params = 0
-    for p in net.parameters():
-        n_params += torch.numel(p)
-        
-    return n_params
 
-def calc_net_gradnorm(net: nn.Module):
-    """just calculates the gradient norm of a network. Call before gradients have been zeroed!"""
-    grad_norm = 0
-    for p in net.parameters():
-        grad_norm += torch.sum(p.grad**2)
-    
-    return grad_norm**0.5
-
-def calc_net_weightnorm(net: nn.Module):
-    """just calculates the parameter weight norm of a network"""
-    weight_norm = 0
-    for p in net.parameters():
-        weight_norm += torch.sum(p**2)
-        
-    return weight_norm**0.5
