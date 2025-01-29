@@ -139,12 +139,50 @@ body {
     background-color: #1636a969; /* Highlight active dots */
 }
 
+.refresh-text {
+    font-weight: 400;
+}
 
-/* Dropdown Styling (this actually worked)*/
-/* .Select-placeholder, .Select-value-label {
+/* dropdown customization */
+.custom-dropdown > .Select-control {
+    position: relative;
+    width: 70px;
+    height: 18px;
+    font-weight: 700;
+    background-color: rgb(200, 200, 200);
+    border: 0px;
+    border-radius: 3px;
+    display: flex;
+}
+
+.custom-dropdown >.Select-control .Select-multi-value-wrapper {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.custom-dropdown >.Select-control .Select-value, .Select-placeholder {
+    line-height: 18px;
+}
+
+.custom-dropdown >.Select-menu-outer {
+    background-color: rgb(200, 200, 200);
+    border: 0px;
+    border-radius: 3px;
+    font-weight: 700;
+}
+
+.custom-dropdown >.Select-control .Select-arrow-zone {
+    line-height: 18px;
+}
+
+.Select-arrow {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-} */
+    top:  7px;
+    left: 10px;
+    height: 10px;
+    width:  10px;
+    /* display: none; */
+}
+
 
 

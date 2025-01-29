@@ -763,45 +763,68 @@ class DashPlotter:
         """
         
         def _make_plotcard(title: str, graphid: str, graphfig: go.Figure, footer: dbc.CardFooter = None):
+            
+            if graphid in ["graph1", "graph2", "graph3"]:
+                header = [
+                    html.Div(
+                        title, 
+                        style = {
+                            "flex": 1, 
+                            "padding-left": "0.25rem",
+                            "margin-right": "10px",
+                        },
+                    ),
+                    html.Div(
+                        "refresh:", 
+                        style = {
+                            "margin-right": "5px",
+                        },
+                        className = "refresh-text",
+                    ),
+                    html.Div(      
+                        dcc.Dropdown(
+                            className="custom-dropdown",
+                            id=f"{graphid}-refreshrate", 
+                            options=[
+                                {"label": "200ms", "value":   200},
+                                {"label": "500ms", "value":   500},
+                                {"label": "  1s ", "value":  1000},
+                                {"label": "  5s ", "value":  5000},
+                                {"label": " 10s ", "value": 10000},
+                            ],
+                            value = 1000, # Default frequency: 1 second
+                            style = {"font-size": 10, "color": "black"},
+                            clearable = False,
+                            optionHeight = 18,
+                            persistence = "const", # remembers the last value
+                            persistence_type = "local", # session, local, or memory 
+                        ),
+                        style = {
+                            "background-color": "green",
+                        },
+                    ),
+                ]
+            else: 
+                header = [
+                        html.Div(
+                            title, 
+                            style = {
+                                "flex": 1, 
+                                "padding-left": "0.25rem",
+                            },
+                        ),
+                ]
+            
             cardcontent = [
                 dbc.CardHeader(
-                    html.Div(
-                        [
-                            html.Span(title, style={"float": "left"}),  # Left-aligned title
-                            # dcc.Dropdown(
-                            #     id=f"{graphid}-refreshrate", 
-                            #     options=[
-                            #         {"label": "200ms", "value":   200},
-                            #         {"label": "500ms", "value":   500},
-                            #         {"label": "  1s ", "value":  1000},
-                            #         {"label": "  5s ", "value":  5000},
-                            #         {"label": " 10s ", "value": 10000},
-                            #     ],
-                            #     value = 1000, # Default frequency: 1 second
-                            #     style={
-                            #         "float": "right", 
-                            #         "width": "100px",
-                            #         "height": "18px",
-                            #         "font-size": 10,
-                            #         "color": "black",
-                            #         "display": "inline",
-                            #         },
-                            #     clearable=False,
-                            #     optionHeight = 18,
-                            #     persistence = "const",
-                            #     persistence_type = "local", # session, local, or memory 
-                            # ),
-                            
-                            dbc.DropdownMenu(
-                                
-                            )
-                            
-                            
-                        ],
-                        style={"display": "flex", "align-items": "center", "justify-content": "space-between"},
-                    ),
-                    className = "px-1 py-0 pt-0 pb-1",
-                    ),
+                    header,
+                    className = "px-0 py-0 pt-0 pb-1",
+                    style     = {
+                        "display": "flex",
+                        "flex-direction": "row",
+                        "align-items": "center",
+                    },
+                ),
                 dbc.CardBody(
                     dcc.Graph(
                         id         = graphid,
@@ -940,7 +963,6 @@ class DashPlotter:
                     autorangeoptions_minallowed = min(     (-paddy * mx), ((1 + paddy) * mn)),
                 )
 
-
         app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
         
         card1 = _make_plotcard(self._setup_options["graph1"]["options"]["title"], "graph1", self._graph1)
@@ -965,8 +987,8 @@ class DashPlotter:
         card5 = dbc.Card(
             [
                 dbc.CardHeader(
-                    "Additional Information:",
-                    className="px-1 py-0 pt-0 pb-1"
+                    html.Div("Additional Information", style = {"padding-left": "0.25rem"}),
+                    className="px-0 py-0 pt-0 pb-1",
                 ),
                 dbc.CardBody(
                     [
@@ -1101,6 +1123,21 @@ class DashPlotter:
         )
         def update_refreshrate_1(selection):
             return selection
+        
+        @app.callback(
+            Output("ud-interval-2", "interval"),
+            Input("graph2-refreshrate", "value")
+        )
+        def update_refreshrate_2(selection):
+            return selection
+        
+        @app.callback(
+            Output("ud-interval-3", "interval"),
+            Input("graph3-refreshrate", "value")
+        )
+        def update_refreshrate_3(selection):
+            return selection
+        
         
         
         return app
