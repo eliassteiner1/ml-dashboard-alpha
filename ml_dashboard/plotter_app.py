@@ -69,17 +69,20 @@ class DashPlotter:
         # add graph 4
         n_steps    = self._setup_options["graph4"]["options"]["n_steps"]
         resolution = self._setup_options["graph4"]["options"]["LL_resol"]
-        n_pvalues = self._setup_options["graph4"]["options"]["n_pvalues"]
+        n_pvalues  = self._setup_options["graph4"]["options"]["n_pvalues"]
         store[f"g{4}_LL_x"] = np.linspace(-1, 1, resolution)
         store[f"g{4}_LL_y"] = np.linspace(-1, 1, resolution)
         store[f"g{4}_LL_z"] = np.ones((n_steps, resolution, resolution))
         
-        store[f"g{4}_LL_z"][:, 0, 0] = np.linspace(0.9, 1.1, n_steps) # debug
-        
-        store[f"g{4}_PV_x"] = np.ones((n_steps, n_pvalues))
+        store[f"g{4}_PV_x"] = np.zeros((n_steps, n_pvalues))
+        store[f"g{4}_PV_x"][1, 0] = 1 # this one will always be one!
         store[f"g{4}_PV_y"] = np.linspace(1, -1, n_pvalues)
         
-        store[f"g{4}_PV_x"][:, 0] = np.linspace(0, 1, n_steps) # debug
+        store[f"g{4}_LL_res"]      = resolution
+        store[f"g{4}_currentstep"] = 0
+        
+        # store[f"g{4}_PV_x"][:, 0]    = np.linspace(0, 1, n_steps) # debug
+        # store[f"g{4}_LL_z"][:, 0, 0] = np.linspace(0.9, 1.1, n_steps) # debug
         
         # add additional information    
         store["proc_speed"] = deque(maxlen=10) 
@@ -150,9 +153,9 @@ class DashPlotter:
                         shape = "linear"
                     ),
                     marker     = dict(
-                        size       = [0, 14], 
+                        size       = [0, 18], 
                         opacity    = [0, 1], 
-                        symbol     = ["circle", "arrow-right"], 
+                        symbol     = ["circle", "star-diamond"], 
                         line_width = [0, 0]
                     ),
                     showlegend = False,
@@ -739,12 +742,12 @@ class DashPlotter:
         res       = opt["options"]["LL_resol"]
         n_pvalues = opt["options"]["n_pvalues"]
         
-        # grab dummy values for LL plot (can't really be empty because log(Z)!)
+        # grab values for LL plot (can't really be empty because log(Z)!)
         LL_x = self._store[f"g{4}_LL_x"] # the same for all steps
         LL_y = self._store[f"g{4}_LL_y"] # the same for all steps
         LL_z = self._store[f"g{4}_LL_z"] # [n_steps/epochs, resolution, resolution]
         
-        # grab dummy values for the PV plot
+        # grab values for the PV plot
         PV_x = self._store[f"g{4}_PV_x"]
         PV_y = self._store[f"g{4}_PV_y"]
 
@@ -909,6 +912,7 @@ class DashPlotter:
                                     ),
                                     showarrow = False,
                                     align     = "left",
+                                    bgcolor   = "rgba(20, 20, 20, 1.0)",
                                 ),
                             ],
                         )
@@ -963,6 +967,46 @@ class DashPlotter:
                     autorangeoptions_minallowed = min(     (-paddy * mx), ((1 + paddy) * mn)),
                 )
 
+        def _update_graph_4(figlist: list[go.Figure]):
+            LLz  = self._store[f"g{4}_LL_z"]
+            PVx  = self._store[f"g{4}_PV_x"]
+            res  = self._store[f"g{4}_LL_res"]
+            zmin = np.log(LLz + 1e-6).min()
+            zmax = np.log(LLz + 1e-6).max()  
+            
+            for stepnr, fig in enumerate(figlist):
+                # Heatmap
+                tracenr                      = self._n2t[f"g{4}"][f"step{stepnr}"][f"LL_q1"]
+                fig.data[tracenr].z          = np.log(LLz[stepnr, res//2:res, res//2:res] + 1e-6)
+                fig.data[tracenr].customdata = LLz[stepnr, res//2:res, res//2:res]
+                fig.data[tracenr].zmin       = zmin
+                fig.data[tracenr].zmax       = zmax
+                
+                tracenr                      = self._n2t[f"g{4}"][f"step{stepnr}"][f"LL_q2"]
+                fig.data[tracenr].z          = np.log(LLz[stepnr, 0:res//2, res//2:res] + 1e-6)
+                fig.data[tracenr].customdata = LLz[stepnr, 0:res//2, res//2:res]
+                fig.data[tracenr].zmin       = zmin
+                fig.data[tracenr].zmax       = zmax
+                
+                tracenr                      = self._n2t[f"g{4}"][f"step{stepnr}"][f"LL_q3"]
+                fig.data[tracenr].z          = np.log(LLz[stepnr, 0:res//2, 0:res//2] + 1e-6)
+                fig.data[tracenr].customdata = LLz[stepnr, 0:res//2, 0:res//2]
+                fig.data[tracenr].zmin       = zmin
+                fig.data[tracenr].zmax       = zmax
+                
+                tracenr                      = self._n2t[f"g{4}"][f"step{stepnr}"][f"LL_q4"]
+                fig.data[tracenr].z          = np.log(LLz[stepnr, res//2:res, 0:res//2] + 1e-6)
+                fig.data[tracenr].customdata = LLz[stepnr, res//2:res, 0:res//2]
+                fig.data[tracenr].zmin       = zmin
+                fig.data[tracenr].zmax       = zmax
+
+                # Pvalues Barplot
+                fig.data[self._n2t[f"g{4}"][f"step{stepnr}"]["PV_bar"]].x = PVx[stepnr, :]
+
+                figlist[stepnr] = fig
+            
+            return figlist
+               
         app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
         
         card1 = _make_plotcard(self._setup_options["graph1"]["options"]["title"], "graph1", self._graph1)
@@ -1058,16 +1102,19 @@ class DashPlotter:
                     interval    = 1000,
                     n_intervals = 0,
                 ),
-                dcc.Interval( # interval for plot3 / card3
+                dcc.Interval( # interval for plot4 / card4
                     id          = "ud-interval-4",
                     interval    = 1000,
                     n_intervals = 0,
                 ),
-                dcc.Interval( # interval for plot3 / card3
+                dcc.Interval( # interval for plot5 / card5
                     id          = "ud-interval-5",
                     interval    = 1000,
                     n_intervals = 0,
                 ),
+                dcc.Store( # holds the currentstep of plot4
+                    id = "currentstep-graph4", data = 0
+                )
             ]
         )
         
@@ -1084,7 +1131,7 @@ class DashPlotter:
             Output("graph2", "figure"),
             Input("ud-interval-2", "n_intervals")
         )
-        def update_graph1(n):
+        def update_graph2(n):
             _update_graph_123(opt = self._setup_options["graph2"], fig = self._graph2, graph = 2) 
             return self._graph2
         
@@ -1092,7 +1139,7 @@ class DashPlotter:
             Output("graph3", "figure"),
             Input("ud-interval-3", "n_intervals")
         )
-        def update_graph1(n):
+        def update_graph3(n):
             _update_graph_123(opt = self._setup_options["graph3"], fig = self._graph3, graph = 3) 
             return self._graph3
         
@@ -1102,6 +1149,27 @@ class DashPlotter:
         )
         def update_graph4(slidervalue):
             return self._graph4[slidervalue]
+        
+        @app.callback(
+            [Output("currentstep-graph4", "data"), Output("graph4-slider", "value")],
+            Input("ud-interval-4", "n_intervals"),
+            State("currentstep-graph4", "data")
+        )
+        def update_graph4_data(n, currentstep):
+            if self._store[f"g{4}_currentstep"] <= currentstep:
+                return no_update
+
+            # if the actual currentstep is higher than was was stored:
+            
+                # update all the data in all the figures for graph4 (just to be save)
+            self._graph4 = _update_graph_4(self._graph4)  
+            
+                # maybe update slider (if locked values) but set position to currentstep for sure
+                # update graph4, show the figure for currentstep
+
+            new_currentstep = self._store[f"g{4}_currentstep"]
+            return new_currentstep, new_currentstep # the other callback will math shown figure to slider value!
+        
         
         @app.callback(
             Output("proc-speed-value", "children"),
@@ -1171,11 +1239,11 @@ class DashPlotter:
             raise ValueError(f"only 'start', 'stop' and 'read' allowed as action! (got {action})")
         
         if action == "start": # starts the timer
-            self._store["proc_speed_t0"] = time.time()
+            self._store["proc_speed_t0"] = time.perf_counter()
             self._store["proc_speed_t1"] = None
         
         if action == "stop": # stops the timer and adds recorded time as proc speed to store (for card 5)
-            self._store["proc_speed_t1"] = time.time()
+            self._store["proc_speed_t1"] = time.perf_counter()
             if self._store["proc_speed_t0"] is None:
                 raise ValueError("start time for batchtimer was not set!")
             if self._store["proc_speed_t0"] >= self._store["proc_speed_t1"]:
@@ -1210,10 +1278,13 @@ class DashPlotter:
                 continue
             
             if "g4" in key:
-                if "LL_Z" in key:
-                    self._store[key][:, :, :] = 1
+                if "LL_z" in key:
+                    self._store[key][:, :, :] = 2
                 if "PV_x" in key:
-                    self._store[key][:, :] = 1
+                    self._store[key] = np.random.rand(self._store[key].shape[0], self._store[key].shape[1])
+                if "currentstep" in key:
+                    self._store[key] += 1
+                    
                 continue
             
             self._store[key] = [None]
