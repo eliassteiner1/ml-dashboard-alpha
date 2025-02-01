@@ -527,7 +527,7 @@ class DashPlotter:
             fig = go.Figure()
             self._n2t[f"g{4}"][f"step{step}"] = {} # has to be initialized first!
             
-            fig.add_trace(_create_LL( # top right Q
+            fig.add_trace(_create_LL( # top right (Q1)
                 LL_x[res//2:res]+G, 
                 LL_y[res//2:res]+G, 
                 LL_z[step, res//2:res, res//2:res], 
@@ -536,16 +536,16 @@ class DashPlotter:
             ))
             self._n2t[f"g{4}"][f"step{step}"]["LL_q1"] = len(self._n2t[f"g{4}"][f"step{step}"])
             
-            fig.add_trace(_create_LL( # top left Q
+            fig.add_trace(_create_LL( # top left (Q2)
                 LL_x[0:res//2]-G, 
                 LL_y[res//2:res]+G, 
-                LL_z[step, 0:res//2, res//2:res], 
+                LL_z[step, res//2:res, 0:res//2], 
                 zmin = LL_zmin, 
                 zmax = LL_zmax
             ))
             self._n2t[f"g{4}"][f"step{step}"]["LL_q2"] = len(self._n2t[f"g{4}"][f"step{step}"])
             
-            fig.add_trace(_create_LL( # bottom left Q
+            fig.add_trace(_create_LL( # bottom left (Q3)
                 LL_x[0:res//2]-G, 
                 LL_y[0:res//2]-G, 
                 LL_z[step, 0:res//2, 0:res//2], 
@@ -554,10 +554,10 @@ class DashPlotter:
             ))
             self._n2t[f"g{4}"][f"step{step}"]["LL_q3"] = len(self._n2t[f"g{4}"][f"step{step}"])
             
-            fig.add_trace(_create_LL( # bottom right Q
+            fig.add_trace(_create_LL( # bottom right (Q4)
                 LL_x[res//2:res]+G, 
                 LL_y[0:res//2]-G, 
-                LL_z[step, res//2:res, 0:res//2], 
+                LL_z[step, 0:res//2, res//2:res], 
                 zmin = LL_zmin, 
                 zmax = LL_zmax
             ))
@@ -983,8 +983,8 @@ class DashPlotter:
                 fig.data[tracenr].zmax       = zmax
                 
                 tracenr                      = self._n2t[f"g{4}"][f"step{stepnr}"][f"LL_q2"]
-                fig.data[tracenr].z          = np.log(LLz[stepnr, 0:res//2, res//2:res] + 1e-6)
-                fig.data[tracenr].customdata = LLz[stepnr, 0:res//2, res//2:res]
+                fig.data[tracenr].z          = np.log(LLz[stepnr, res//2:res, 0:res//2] + 1e-6)
+                fig.data[tracenr].customdata = LLz[stepnr, res//2:res, 0:res//2]
                 fig.data[tracenr].zmin       = zmin
                 fig.data[tracenr].zmax       = zmax
                 
@@ -995,16 +995,16 @@ class DashPlotter:
                 fig.data[tracenr].zmax       = zmax
                 
                 tracenr                      = self._n2t[f"g{4}"][f"step{stepnr}"][f"LL_q4"]
-                fig.data[tracenr].z          = np.log(LLz[stepnr, res//2:res, 0:res//2] + 1e-6)
-                fig.data[tracenr].customdata = LLz[stepnr, res//2:res, 0:res//2]
+                fig.data[tracenr].z          = np.log(LLz[stepnr, 0:res//2, res//2:res] + 1e-6)
+                fig.data[tracenr].customdata = LLz[stepnr, 0:res//2, res//2:res]
                 fig.data[tracenr].zmin       = zmin
                 fig.data[tracenr].zmax       = zmax
 
                 # Pvalues Barplot
-                fig.data[self._n2t[f"g{4}"][f"step{stepnr}"]["PV_bar"]].x = PVx[stepnr, :]
+                fig.data[self._n2t[f"g{4}"][f"step{stepnr}"]["PV_bar"]].x          = PVx[stepnr, :] + 0.05
+                fig.data[self._n2t[f"g{4}"][f"step{stepnr}"]["PV_bar"]].customdata = PVx[stepnr, :]
 
                 figlist[stepnr] = fig
-            
             return figlist
                
         app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -1022,7 +1022,7 @@ class DashPlotter:
                     id         = "graph4-slider",
                     tooltip    = {"placement": "top", "always_visible": False},
                     updatemode = "drag",
-                    marks = {i: {} for i in range(self._setup_options["graph4"]["options"]["n_steps"])},
+                    marks = {0: {}, },
                     className = "pt-0 pb-0 px-0 py-0",
                 ), 
                 className="px-0 py-0 pt-1 pb-0",                
@@ -1151,7 +1151,7 @@ class DashPlotter:
             return self._graph4[slidervalue]
         
         @app.callback(
-            [Output("currentstep-graph4", "data"), Output("graph4-slider", "value")],
+            [Output("currentstep-graph4", "data"), Output("graph4-slider", "value"), Output("graph4-slider", "marks")],
             Input("ud-interval-4", "n_intervals"),
             State("currentstep-graph4", "data")
         )
@@ -1159,16 +1159,11 @@ class DashPlotter:
             if self._store[f"g{4}_currentstep"] <= currentstep:
                 return no_update
 
-            # if the actual currentstep is higher than was was stored:
-            
-                # update all the data in all the figures for graph4 (just to be save)
             self._graph4 = _update_graph_4(self._graph4)  
             
-                # maybe update slider (if locked values) but set position to currentstep for sure
-                # update graph4, show the figure for currentstep
-
-            new_currentstep = self._store[f"g{4}_currentstep"]
-            return new_currentstep, new_currentstep # the other callback will math shown figure to slider value!
+            # the other callback will match shown figure to slider value that is set by this function!!
+            new_currentstep = self._store[f"g{4}_currentstep"] 
+            return new_currentstep, new_currentstep, {i: {} for i in range(new_currentstep + 1)}
         
         
         @app.callback(
@@ -1279,7 +1274,14 @@ class DashPlotter:
             
             if "g4" in key:
                 if "LL_z" in key:
-                    self._store[key][:, :, :] = 2
+                    x = torch.linspace(-1, 1, 16)
+                    y = torch.linspace(-1, 1, 16)
+                    X, Y = torch.meshgrid(x, y, indexing="xy")
+                    Z = X+Y + 10
+
+                    self._store[key][0, :, :] = Z
+                    self._store[key][1, :, :] = Z
+                    self._store[key][2, :, :] = Z
                 if "PV_x" in key:
                     self._store[key] = np.random.rand(self._store[key].shape[0], self._store[key].shape[1])
                 if "currentstep" in key:
