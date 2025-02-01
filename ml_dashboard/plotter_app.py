@@ -28,21 +28,18 @@ class DashPlotter:
         
         self._store  = self._make_store()
         self._n2t    = { # links a unique identifier to the respective trace number for each trace
-                "g1": {},
-                "g2": {},
-                "g3": {},
-                "g4": {},
-            } 
-        
-        self._graph1 = make_flexgraph(self._store, self._n2t, opt = self._setup_options["graph1"], graph = 1)
-        self._graph2 = make_flexgraph(self._store, self._n2t, opt = self._setup_options["graph2"], graph = 2)
-        self._graph3 = make_flexgraph(self._store, self._n2t, opt = self._setup_options["graph3"], graph = 3)
-        self._graph4 = make_pcagraph (self._store, self._n2t, opt = self._setup_options["graph4"])
-
-        self._app    = make_plotter_app(
-            self._setup_options, self._store, self._n2t, 
-            graph1 = self._graph1, graph2 = self._graph2, graph3 = self._graph3, graph4 = self._graph4
-        )
+            "g1": {},
+            "g2": {},
+            "g3": {},
+            "g4": {},
+        }
+        self._graphstore = {
+            "g1": make_flexgraph(self._store, self._n2t, opt = self._setup_options["graph1"], graph = 1),
+            "g2": make_flexgraph(self._store, self._n2t, opt = self._setup_options["graph2"], graph = 2),
+            "g3": make_flexgraph(self._store, self._n2t, opt = self._setup_options["graph3"], graph = 3),
+            "g4": make_pcagraph (self._store, self._n2t, opt = self._setup_options["graph4"]),
+        }
+        self._app    = make_plotter_app(self._setup_options, self._store, self._n2t, self._graphstore)
     
     def _make_store(self):
         

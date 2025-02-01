@@ -8,10 +8,7 @@ from   ml_dashboard.components import update_flexgraph, update_pcagraph
 
 """note on axis resetting with double click: the implementation is actually buggy and doesn't work reliable. In short, the fix is to either use autorangeoptions_minallowed / autorangeoptions_maxallowed where applicable. The second fix, is to return not the figure in the callback function for updating the plot, but also the parent container, e.g. actually piece together the dcc.Graph object and return this. This actually then works as intended!"""
  
-def make_plotter_app(
-    setup_options: dict, store: dict, n2t: dict,
-    graph1: go.Figure, graph2: go.Figure, graph3: go.Figure, graph4: list[go.Figure]
-    ):
+def make_plotter_app(setup_options: dict, store: dict, n2t: dict, graphstore: dict):
     """
     Grid Layout:
     +------------------------------------------+---------------------------+ 
@@ -29,13 +26,13 @@ def make_plotter_app(
         assets_folder        = "../assets" # specify assets folder because project structure is different from default
         )
     
-    card1 = make_graphcard(setup_options["graph1"]["options"]["title"], "graph1", graph1)
-    card2 = make_graphcard(setup_options["graph2"]["options"]["title"], "graph2", graph2)
-    card3 = make_graphcard(setup_options["graph3"]["options"]["title"], "graph3", graph3)
+    card1 = make_graphcard(setup_options["graph1"]["options"]["title"], "graph1", graphstore["g1"])
+    card2 = make_graphcard(setup_options["graph2"]["options"]["title"], "graph2", graphstore["g2"])
+    card3 = make_graphcard(setup_options["graph3"]["options"]["title"], "graph3", graphstore["g3"])
     card4 = make_pcacard(
         setup_options["graph4"]["options"]["title"], 
         "graph4", 
-        graph4[0], 
+        graphstore["g4"][0], 
         setup_options["graph4"]["options"]["n_steps"]
         )
     card5 = make_infocard("additional information")
@@ -101,31 +98,31 @@ def make_plotter_app(
         Input("ud-interval-1", "n_intervals")
     )
     def update_graph1(n):
-        update_flexgraph(store, n2t, opt = setup_options["graph1"], fig = graph1, graph = 1)
-        return graph1
+        update_flexgraph(store, n2t, opt = setup_options["graph1"], fig = graphstore["g1"], graph = 1)
+        return graphstore["g1"]
     
     @app.callback(
         Output("graph2", "figure"),
         Input("ud-interval-2", "n_intervals")
     )
     def update_graph2(n):
-        update_flexgraph(store, n2t, opt = setup_options["graph2"], fig = graph2, graph = 2)
-        return graph2
+        update_flexgraph(store, n2t, opt = setup_options["graph2"], fig = graphstore["g2"], graph = 2)
+        return graphstore["g2"]
     
     @app.callback(
         Output("graph3", "figure"),
         Input("ud-interval-3", "n_intervals")
     )
     def update_graph3(n):
-        update_flexgraph(store, n2t, opt = setup_options["graph3"], fig = graph3, graph = 3)
-        return graph3
+        update_flexgraph(store, n2t, opt = setup_options["graph3"], fig = graphstore["g3"], graph = 3)
+        return graphstore["g3"]
     
     @app.callback(
         Output("graph4", "figure"),
         Input("graph4-slider", "value")
     )
     def update_graph4(slidervalue):
-        return graph4[slidervalue]
+        return graphstore["g4"][slidervalue]
     
     @app.callback(
         [Output("currentstep-graph4", "data"), Output("graph4-slider", "value"), Output("graph4-slider", "marks")],
@@ -136,7 +133,7 @@ def make_plotter_app(
         if store[f"g{4}_currentstep"] <= currentstep:
             return no_update
         
-        update_pcagraph(store, n2t, graph4) 
+        update_pcagraph(store, n2t, graphstore["g4"]) 
         
         # the other callback will then match shown figure to slider value that is set by this function!!
         new_currentstep = store[f"g{4}_currentstep"] 
