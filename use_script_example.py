@@ -61,6 +61,8 @@ if __name__ == "__main__":
     
     Nr = lambda: np.random.rand()
     
+    time.sleep(3)
+    
     for i in range(total):
         if i % 1000 == 0 and i > 0:
             PLOTTER._store[f"g{4}_currentstep"] += 1
@@ -71,7 +73,7 @@ if __name__ == "__main__":
         PLOTTER.add_data(graph=2, trace=2, x=i, y=3*Nr()+30)
         PLOTTER.add_data(graph=2, trace=3, x=i, y=10*Nr()+100)
         
-        PLOTTER.add_data(graph=3, trace=1, x=i, y=Nr())
+        PLOTTER.add_data(graph=3, trace=1, x=i, y=Nr() - 0.5)
         PLOTTER.add_data(graph=3, trace=2, x=i, y=Nr())
         
         PLOTTER._store["proc_speed"].append(np.random.rand() * 100_000)

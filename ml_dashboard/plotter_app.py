@@ -54,8 +54,8 @@ class DashPlotter:
                 # all the data needs to have a "None" so that the legends show up even when data is empty
                 store[f"g{j}_t{k}_x"]    = [None]
                 store[f"g{j}_t{k}_y"]    = [None]
-                store[f"g{j}_t{k}_ymin"] = 0
-                store[f"g{j}_t{k}_ymax"] = 0
+                store[f"g{j}_t{k}_ymin"] =  float("inf")
+                store[f"g{j}_t{k}_ymax"] = -float("inf")
                 
                 if self._setup_options[keyJ][keyK]["E"] is True:
                     store[f"g{j}_t{k}_lo"] = [None]
@@ -87,40 +87,6 @@ class DashPlotter:
 
         return store
    
-    # def reset_data(self):
-    #     for key in self._store.keys():
-            
-    #         if "ymax" in key or "ymin" in key:
-    #             self._store[key] = 0
-    #             continue
-            
-    #         if "proc_speed" in key:
-    #             if ("t0" in key) or ("t1" in key):
-    #                 self._store[key] = None
-    #                 continue
-                
-    #             self._store[key] = deque(maxlen=10)  
-    #             continue
-            
-    #         if "g4" in key:
-    #             if "LL_z" in key:
-    #                 x = torch.linspace(-1, 1, 16)
-    #                 y = torch.linspace(-1, 1, 16)
-    #                 X, Y = torch.meshgrid(x, y, indexing="xy")
-    #                 Z = X+Y + 10
-
-    #                 self._store[key][0, :, :] = Z
-    #                 self._store[key][1, :, :] = Z
-    #                 self._store[key][2, :, :] = Z
-    #             if "PV_x" in key:
-    #                 self._store[key] = np.random.rand(self._store[key].shape[0], self._store[key].shape[1])
-    #             if "currentstep" in key:
-    #                 self._store[key] += 1
-                    
-    #             continue
-            
-    #         self._store[key] = [None]
-
    
     def add_data(self, graph: int, trace: int, x: float, y: float, lo: float = None, hi: float = None):
         # TODO do robust sanitizing of input data! (like detach, cpu, remove Nans, etc...)

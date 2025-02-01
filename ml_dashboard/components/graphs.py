@@ -686,7 +686,7 @@ def update_flexgraph(store: dict, n2t: dict, opt: dict, fig: go.Figure, graph: i
     paddx = 0.03 
     paddy = 0.05
     
-    # init all with zero to avoid having min() or max() failing. zeros do not affect outcome anyways
+    # init all with zero to avoid having min() or max() failing. This actually safequards against having really extreme initial values for ymin and ymax!
     graphmax_pr = [0]
     graphmin_pr = [0]
     graphmax_sc = [0] 
@@ -707,7 +707,7 @@ def update_flexgraph(store: dict, n2t: dict, opt: dict, fig: go.Figure, graph: i
             trace_w_best_key = opt["options"]["showbest"]
             
             # only possible if the trace data is more than: [None]. Account for initial "None" when doing min! > ([1:])
-            if len(store[f"g{graph}_t{i}_y"]) > 1:
+            if len(store[f"g{graph}_t{i}_y"]) > 1:                
                 best = min(store[f"g{graph}_t{i}_y"][1:]) #TODO replace this to use ymin!! (currently inefficient)
                 
                 fig.data[n2t[f"g{graph}"][f"t{i}_best"]].x = [0, (1 + paddx) * total]
