@@ -9,12 +9,13 @@ from   collections import deque
 # third-party library imports
 import numpy as np
 import torch
-from dash import Dash, Input, Output, State, ctx, dcc, html, no_update
+from dash import Dash, Input, Output, State, dcc, html, no_update
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 # local library imports
 from ml_dashboard.utils import adjust_alpha
+from ml_dashboard.components import make_graphcard, make_pcacard, make_infocard
 
 """note on axis resetting with double click: the implementation is actually buggy and doesn't work reliable. In short, the fix is to either use autorangeoptions_minallowed / autorangeoptions_maxallowed where applicable. The second fix, is to return not the figure in the callback function for updating the plot, but also the parent container, e.g. actually piece together the dcc.Graph object and return this. This actually then works as intended!"""
 
@@ -765,98 +766,6 @@ class DashPlotter:
         +------------------------------------------+---------------------------+  
         """
         
-        def _make_plotcard(title: str, graphid: str, graphfig: go.Figure, footer: dbc.CardFooter = None):
-            
-            if graphid in ["graph1", "graph2", "graph3"]:
-                header = [
-                    html.Div(
-                        title, 
-                        style = {
-                            "flex": 1, 
-                            "padding-left": "0.25rem",
-                            "margin-right": "10px",
-                        },
-                    ),
-                    html.Div(
-                        "refresh:", 
-                        style = {
-                            "margin-right": "5px",
-                        },
-                        className = "refresh-text",
-                    ),
-                    html.Div(      
-                        dcc.Dropdown(
-                            className="custom-dropdown",
-                            id=f"{graphid}-refreshrate", 
-                            options=[
-                                {"label": "200ms", "value":   200},
-                                {"label": "500ms", "value":   500},
-                                {"label": "  1s ", "value":  1000},
-                                {"label": "  5s ", "value":  5000},
-                                {"label": " 10s ", "value": 10000},
-                            ],
-                            value = 1000, # Default frequency: 1 second
-                            style = {"font-size": 10, "color": "black"},
-                            clearable = False,
-                            optionHeight = 18,
-                            persistence = "const", # remembers the last value
-                            persistence_type = "local", # session, local, or memory 
-                        ),
-                        style = {
-                            "background-color": "green",
-                        },
-                    ),
-                ]
-            else: 
-                header = [
-                        html.Div(
-                            title, 
-                            style = {
-                                "flex": 1, 
-                                "padding-left": "0.25rem",
-                            },
-                        ),
-                ]
-            
-            cardcontent = [
-                dbc.CardHeader(
-                    header,
-                    className = "px-0 py-0 pt-0 pb-1",
-                    style     = {
-                        "display": "flex",
-                        "flex-direction": "row",
-                        "align-items": "center",
-                    },
-                ),
-                dbc.CardBody(
-                    dcc.Graph(
-                        id         = graphid,
-                        figure     = graphfig,
-                        responsive = True,
-                        style      = {"height": "100%", "width": "100%"},
-                        config={
-                            "showTips"            : False, 
-                            "displaylogo"         : False,
-                            "toImageButtonOptions": {
-                                "format": "svg", # one of png, svg, jpeg, webp
-                                "scale" : 1,     # Multiply title/legend/axis/canvas sizes by this factor
-                            }
-                        },
-                    ), 
-                    className = "px-0 py-0 pt-2 pb-0"
-                )
-            ]
-            
-            if footer is not None:
-                cardcontent += [footer]
-            
-            card = dbc.Card(
-                cardcontent,
-                className = "h-100 p-2",
-            )
-            
-            return card
-
         def _update_graph_123(opt: dict, fig: go.Figure, graph: int):
             """opt is just the graphX dict (with options and traces), not the whole setup_options!"""
             
@@ -1009,59 +918,16 @@ class DashPlotter:
                
         app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
         
-        card1 = _make_plotcard(self._setup_options["graph1"]["options"]["title"], "graph1", self._graph1)
-        card2 = _make_plotcard(self._setup_options["graph2"]["options"]["title"], "graph2", self._graph2)
-        card3 = _make_plotcard(self._setup_options["graph3"]["options"]["title"], "graph3", self._graph3)
-        card4 = _make_plotcard(self._setup_options["graph4"]["options"]["title"], "graph4", self._graph4[0], 
-            footer = dbc.CardFooter(
-                dcc.Slider(
-                    min        = 0, 
-                    max        = (self._setup_options["graph4"]["options"]["n_steps"] - 1), 
-                    step       = None,
-                    value      = 0,
-                    id         = "graph4-slider",
-                    tooltip    = {"placement": "top", "always_visible": False},
-                    updatemode = "drag",
-                    marks = {0: {}, },
-                    className = "pt-0 pb-0 px-0 py-0",
-                ), 
-                className="px-0 py-0 pt-1 pb-0",                
-            )          
-        )
-        card5 = dbc.Card(
-            [
-                dbc.CardHeader(
-                    html.Div("Additional Information", style = {"padding-left": "0.25rem"}),
-                    className="px-0 py-0 pt-0 pb-1",
-                ),
-                dbc.CardBody(
-                    [
-                        html.Div(
-                            [
-                                html.Span(
-                                    "Processing Speed: ", 
-                                    id="proc-speed-label", 
-                                    style={"float": "left"}
-                                    ),
-                                html.Span(
-                                    "---- samples/sec", 
-                                    id="proc-speed-value", 
-                                    style={"float": "right"},
-                                    className="bold-text",
-                                    ),
-                            ],
-                            style={"width": "100%"},
-                        ),   
-                        html.Div("Total nr. of Parameters:"),
-                        html.Div("asdfasdfasdf"),
-                    ],
-                    className="px-1 py-0 pt-2 pb-0",
-                    style={"whiteSpace": "normal", "display": "flex", "flexDirection": "column"}
-                ), 
-            ],
-            className = "h-100 p-2",
-            id = "card-5",
-        )
+        card1 = make_graphcard(self._setup_options["graph1"]["options"]["title"], "graph1", self._graph1)
+        card2 = make_graphcard(self._setup_options["graph2"]["options"]["title"], "graph2", self._graph2)
+        card3 = make_graphcard(self._setup_options["graph3"]["options"]["title"], "graph3", self._graph3)
+        card4 = make_pcacard(
+            self._setup_options["graph4"]["options"]["title"], 
+            "graph4", 
+            self._graph4[0], 
+            self._setup_options["graph4"]["options"]["n_steps"]
+            )
+        card5 = make_infocard("additional information")
         
         app.layout = html.Div(
             style={

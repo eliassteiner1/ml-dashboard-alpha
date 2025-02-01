@@ -47,12 +47,18 @@ body {
     border-top: 2px solid rgb(101, 95, 115);
 } */
 
-/* Add line between children of card-body. optional: > div:not(:last-child) */
-#card-5 .card-body > div {
-    border-bottom: 1px solid rgb(101, 95, 115); /* Add line between children */
+/* Add the padding between the children of the infocard (also last) */
+#infocard .card-body > div {
     padding-bottom: 0.5rem; /* Space below the line */
     padding-top: 0.5rem; /* Ensure consistent spacing */
 }
+
+/* Add line between children of card-body but not the last */
+#infocard .card-body > div:not(:last-child) {
+    border-bottom: 1px solid rgb(101, 95, 115); /* Add line between children */
+}
+
+
 
 .bold-text {
     font-weight: 800;
