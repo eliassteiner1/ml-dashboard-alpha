@@ -1,5 +1,6 @@
 from .cards  import make_graphcard, make_pcacard, make_infocard
 from .graphs import make_flexgraph, make_pcagraph, update_flexgraph, update_pcagraph
+from .app    import make_plotter_app
 
 __all__ = [
     "make_graphcard",
@@ -9,5 +10,7 @@ __all__ = [
     "make_flexgraph",
     "make_pcagraph",
     "update_flexgraph",
-    "update_pcagraph"
+    "update_pcagraph",
+    
+    "make_plotter_app",
 ]
