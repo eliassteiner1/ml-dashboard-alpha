@@ -2,6 +2,7 @@ import time
 import numpy as np
 from ml_dashboard import DashPlotter, calc_net_gradnorm, calc_net_nparams, calc_net_weightnorm
 
+# here I made some changes to the main branch in the meantime
 
 if __name__ == "__main__":
     setup_options = { 
