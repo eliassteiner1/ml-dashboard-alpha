@@ -56,6 +56,7 @@ class DashPlotter:
                 store[f"g{j}_t{k}_y"]    = [None]
                 store[f"g{j}_t{k}_ymin"] =  float("inf")
                 store[f"g{j}_t{k}_ymax"] = -float("inf")
+                store[f"g{j}_t{k}_CHKP"] = 1 # start checkpoint at 1 because of the initial none value
                 
                 if self._setup_options[keyJ][keyK]["E"] is True:
                     store[f"g{j}_t{k}_lo"] = [None]
