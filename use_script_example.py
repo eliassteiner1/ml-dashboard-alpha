@@ -2,7 +2,6 @@ import time
 import numpy as np
 from ml_dashboard import DashPlotter, calc_net_gradnorm, calc_net_nparams, calc_net_weightnorm
 
-
 if __name__ == "__main__":
     setup_options = { 
         "graph1": {
