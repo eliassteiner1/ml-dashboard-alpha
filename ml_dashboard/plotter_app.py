@@ -153,9 +153,9 @@ class DashPlotter:
                         shape = "linear"
                     ),
                     marker     = dict(
-                        size       = [0, 18], 
+                        size       = [0, 20], 
                         opacity    = [0, 1], 
-                        symbol     = ["circle", "star-diamond"], 
+                        symbol     = ["circle", "triangle-left"], 
                         line_width = [0, 0]
                     ),
                     showlegend = False,
