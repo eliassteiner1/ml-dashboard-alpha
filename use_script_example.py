@@ -16,8 +16,8 @@ if __name__ == "__main__":
                 "showbest": "trace2",
                 "total"   : total,
             },
-            "trace1" : {"N": "loss_train", "C": "firebrick", "T": None, "E": True, "P": True},
-            "trace2" : {"N": "loss_valid", "C": "seagreen",  "T": None, "E": False, "P": True},
+            "trace1" : {"N": "loss_train", "C": "firebrick", "T": None, "E": True, "P": True, "S": "spline"},
+            "trace2" : {"N": "loss_valid", "C": "seagreen",  "T": None, "E": False, "P": True, "S": "linear"},
         },
         "graph2": {
             "options": {
@@ -29,9 +29,9 @@ if __name__ == "__main__":
                 "showbest" : None,
                 "total"    : total
             },
-            "trace1" : {"N": "eff. UdR", "C": "gold",       "T": "primary",   "E": False, "P": True},
-            "trace2" : {"N": "eff. LR",  "C": "orange",     "T": "primary",   "E": False, "P": True},
-            "trace3" : {"N": "batch sz", "C": "darkorchid", "T": "secondary", "E": False, "P": True},
+            "trace1" : {"N": "eff. UdR", "C": "gold",       "T": "primary",   "E": False, "P": True, "S": "linear"},
+            "trace2" : {"N": "eff. LR",  "C": "orange",     "T": "primary",   "E": False, "P": True, "S": "linear"},
+            "trace3" : {"N": "batch sz", "C": "darkorchid", "T": "secondary", "E": False, "P": True, "S": "linear"},
         },  
         "graph3": {
             "options": {
@@ -43,8 +43,8 @@ if __name__ == "__main__":
                 "showbest" : None,
                 "total"    : total,
             },
-            "trace1" : {"N": "grad norm",   "C": "steelblue",   "T": "primary",   "E": False, "P": True},
-            "trace2" : {"N": "weight norm", "C": "saddlebrown", "T": "secondary", "E": False, "P": True},
+            "trace1" : {"N": "grad norm",   "C": "steelblue",   "T": "primary",   "E": False, "P": True, "S": "linear"},
+            "trace2" : {"N": "weight norm", "C": "saddlebrown", "T": "secondary", "E": False, "P": True, "S": "linear"},
         },  
         "graph4": {
             "options": {
@@ -77,7 +77,7 @@ if __name__ == "__main__":
         PLOTTER.add_data(graph=3, trace=2, x=i, y=Nr())
         
         PLOTTER._store["proc_speed"].append(np.random.rand() * 100_000)
-        time.sleep(0.1)
+        time.sleep(0.05)
 
     
     PLOTTER.run_script_spin()
