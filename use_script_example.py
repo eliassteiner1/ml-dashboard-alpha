@@ -3,6 +3,8 @@ import numpy as np
 from ml_dashboard import DashPlotter, calc_net_gradnorm, calc_net_nparams, calc_net_weightnorm
 
 if __name__ == "__main__":
+    total = 10_000
+    
     setup_options = { 
         "graph1": {
             "options": {
@@ -12,7 +14,7 @@ if __name__ == "__main__":
                 "ylabel2" : None,
                 "subplots": False,
                 "showbest": "trace2",
-                "total"   : 100,
+                "total"   : total,
             },
             "trace1" : {"N": "loss_train", "C": "firebrick", "T": None, "E": True, "P": True},
             "trace2" : {"N": "loss_valid", "C": "seagreen",  "T": None, "E": False, "P": True},
@@ -25,7 +27,7 @@ if __name__ == "__main__":
                 "ylabel2"  : "batch size",
                 "subplots" : True,
                 "showbest" : None,
-                "total"    : 100,
+                "total"    : total
             },
             "trace1" : {"N": "eff. UdR", "C": "gold",       "T": "primary",   "E": False, "P": True},
             "trace2" : {"N": "eff. LR",  "C": "orange",     "T": "primary",   "E": False, "P": True},
@@ -39,7 +41,7 @@ if __name__ == "__main__":
                 "ylabel2"  : "weight norm",
                 "subplots" : True,
                 "showbest" : None,
-                "total"    : 100,
+                "total"    : total,
             },
             "trace1" : {"N": "grad norm",   "C": "steelblue",   "T": "primary",   "E": False, "P": True},
             "trace2" : {"N": "weight norm", "C": "saddlebrown", "T": "secondary", "E": False, "P": True},
@@ -47,7 +49,7 @@ if __name__ == "__main__":
         "graph4": {
             "options": {
                 "title"     : "PCA stuff",
-                "n_steps"   : 25,
+                "n_steps"   : 10,
                 "LL_resol"  : 16,
                 "n_pvalues" : 20,   
             },
@@ -59,12 +61,9 @@ if __name__ == "__main__":
     
     Nr = lambda: np.random.rand()
     
-    i = 0
-    while True:
-        if i >= 100:
-            PLOTTER.reset_data()
-            i = 0
-            
+    for i in range(total):
+        if i % 1000 == 0 and i > 0:
+            PLOTTER._store[f"g{4}_currentstep"] += 1
         PLOTTER.add_data(graph=1, trace=1, x=i, y=2*Nr() + 5, lo = Nr()+1, hi = Nr()+2)
         PLOTTER.add_data(graph=1, trace=2, x=i, y=Nr() + 5)
         
@@ -76,9 +75,7 @@ if __name__ == "__main__":
         PLOTTER.add_data(graph=3, trace=2, x=i, y=Nr())
         
         PLOTTER._store["proc_speed"].append(np.random.rand() * 100_000)
-                
-        i += 1
-        
-        time.sleep(0.3)
+        time.sleep(0.1)
+
     
     PLOTTER.run_script_spin()

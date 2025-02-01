@@ -17,7 +17,6 @@ from plotly.subplots import make_subplots
 from ml_dashboard.components import make_plotter_app, make_flexgraph, make_pcagraph
 
 
-
 class DashPlotter:
     
     def __init__(self, setup_options: dict):
@@ -88,39 +87,39 @@ class DashPlotter:
 
         return store
    
-    def reset_data(self):
-        for key in self._store.keys():
+    # def reset_data(self):
+    #     for key in self._store.keys():
             
-            if "ymax" in key or "ymin" in key:
-                self._store[key] = 0
-                continue
+    #         if "ymax" in key or "ymin" in key:
+    #             self._store[key] = 0
+    #             continue
             
-            if "proc_speed" in key:
-                if ("t0" in key) or ("t1" in key):
-                    self._store[key] = None
-                    continue
+    #         if "proc_speed" in key:
+    #             if ("t0" in key) or ("t1" in key):
+    #                 self._store[key] = None
+    #                 continue
                 
-                self._store[key] = deque(maxlen=10)  
-                continue
+    #             self._store[key] = deque(maxlen=10)  
+    #             continue
             
-            if "g4" in key:
-                if "LL_z" in key:
-                    x = torch.linspace(-1, 1, 16)
-                    y = torch.linspace(-1, 1, 16)
-                    X, Y = torch.meshgrid(x, y, indexing="xy")
-                    Z = X+Y + 10
+    #         if "g4" in key:
+    #             if "LL_z" in key:
+    #                 x = torch.linspace(-1, 1, 16)
+    #                 y = torch.linspace(-1, 1, 16)
+    #                 X, Y = torch.meshgrid(x, y, indexing="xy")
+    #                 Z = X+Y + 10
 
-                    self._store[key][0, :, :] = Z
-                    self._store[key][1, :, :] = Z
-                    self._store[key][2, :, :] = Z
-                if "PV_x" in key:
-                    self._store[key] = np.random.rand(self._store[key].shape[0], self._store[key].shape[1])
-                if "currentstep" in key:
-                    self._store[key] += 1
+    #                 self._store[key][0, :, :] = Z
+    #                 self._store[key][1, :, :] = Z
+    #                 self._store[key][2, :, :] = Z
+    #             if "PV_x" in key:
+    #                 self._store[key] = np.random.rand(self._store[key].shape[0], self._store[key].shape[1])
+    #             if "currentstep" in key:
+    #                 self._store[key] += 1
                     
-                continue
+    #             continue
             
-            self._store[key] = [None]
+    #         self._store[key] = [None]
 
    
     def add_data(self, graph: int, trace: int, x: float, y: float, lo: float = None, hi: float = None):
