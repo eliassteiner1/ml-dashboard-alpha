@@ -77,7 +77,7 @@ if __name__ == "__main__":
         PLOTTER.add_data(graph=3, trace=2, x=i, y=Nr())
         
         PLOTTER._store["proc_speed"].append(np.random.rand() * 100_000)
-        time.sleep(0.05)
+        time.sleep(0.005)
 
     
     PLOTTER.run_script_spin()

@@ -1,9 +1,10 @@
 from   dash import Dash, Input, Output, State, dcc, html, no_update
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
+from   plotly.subplots import make_subplots
 
 from   ml_dashboard.components import make_graphcard, make_pcacard, make_infocard
-from   ml_dashboard.components import update_flexgraph, update_pcagraph
+from   ml_dashboard.components import update_flexgraph_extend, update_flexgraph_full, update_pcagraph
 
 
 """note on axis resetting with double click: the implementation is actually buggy and doesn't work reliable. In short, the fix is to either use autorangeoptions_minallowed / autorangeoptions_maxallowed where applicable. The second fix, is to return not the figure in the callback function for updating the plot, but also the parent container, e.g. actually piece together the dcc.Graph object and return this. This actually then works as intended!"""
@@ -92,31 +93,129 @@ def make_plotter_app(setup_options: dict, store: dict, n2t: dict, graphstore: di
         ]
     )
     
-    # TODO add early stops if the data store has actually not changed between updates!
     @app.callback(
         Output("graph1", "figure"),
         Input("ud-interval-1", "n_intervals")
     )
-    def update_graph1(n):
-        update_flexgraph(store, n2t, opt = setup_options["graph1"], fig = graphstore["g1"], graph = 1)
+    def ud_graph1(n):
+        update_flexgraph_full(store, n2t, opt = setup_options["graph1"], fig = graphstore["g1"], graph = 1)
         return graphstore["g1"]
     
     @app.callback(
         Output("graph2", "figure"),
         Input("ud-interval-2", "n_intervals")
     )
-    def update_graph2(n):
-        update_flexgraph(store, n2t, opt = setup_options["graph2"], fig = graphstore["g2"], graph = 2)
+    def ud_graph2(n):
+        update_flexgraph_full(store, n2t, opt = setup_options["graph2"], fig = graphstore["g2"], graph = 2)
         return graphstore["g2"]
     
     @app.callback(
         Output("graph3", "figure"),
         Input("ud-interval-3", "n_intervals")
     )
-    def update_graph3(n):
-        update_flexgraph(store, n2t, opt = setup_options["graph3"], fig = graphstore["g3"], graph = 3)
+    def ud_graph3(n):
+        update_flexgraph_full(store, n2t, opt = setup_options["graph3"], fig = graphstore["g3"], graph = 3)
         return graphstore["g3"]
     
+    # @app.callback(
+    #     [Output("graph1", "extendData"), Output("graph1", "figure")],
+    #     [Input("ud-interval-1", "n_intervals")],
+    #     [State("graph1", "figure")]
+    # )
+    # def update_graph1_combined(n, figdict):
+    #     do_full_update = False
+    #     i = 1
+    #     for key in setup_options["graph1"].keys(): # just find if update is necessary
+    #         if do_full_update is True:
+    #             break # no need to ckeck the other traces, full update is due anyways
+    #         if "trace" not in key:
+    #             continue
+    #         if store[f"g{1}_t{i}_ymin"] != store[f"g{1}_t{i}_yminnew"]:
+    #             do_full_update = True
+    #         if store[f"g{1}_t{i}_ymax"] != store[f"g{1}_t{i}_ymaxnew"]:
+    #             do_full_update = True
+    #         i += 1
+        
+    #     do_full_update = False # debug
+    #     if do_full_update is False:
+    #         extend = update_flexgraph_extend(store, n2t, opt = setup_options["graph1"], graph = 1)
+    #         return extend, no_update
+        
+    #     fig = go.Figure(figdict)
+    #     update_flexgraph_full(store, n2t, opt = setup_options["graph1"], fig = fig, graph = 1) 
+    #     return no_update, fig
+    
+    # @app.callback(
+    #     [Output("graph2", "extendData"), Output("graph2", "figure")],
+    #     [Input("ud-interval-2", "n_intervals")],
+    #     [State("graph2", "figure")]
+    # )
+    # def update_graph2_combined(n, figdict):
+    #     do_full_update = False
+    #     i = 1
+    #     for key in setup_options["graph2"].keys(): # just find if update is necessary
+    #         if do_full_update is True:
+    #             break # no need to ckeck the other traces, full update is due anyways
+    #         if "trace" not in key:
+    #             continue
+    #         if store[f"g{2}_t{i}_ymin"] != store[f"g{2}_t{i}_yminnew"]:
+    #             do_full_update = True
+    #         if store[f"g{2}_t{i}_ymax"] != store[f"g{2}_t{i}_ymaxnew"]:
+    #             do_full_update = True
+    #         i += 1
+        
+    #     do_full_update = False # debug
+    #     if do_full_update is False:
+    #         extend = update_flexgraph_extend(store, n2t, opt = setup_options["graph2"], graph = 2)
+    #         return extend, no_update
+        
+    #     fig = make_subplots(specs=[[{"secondary_y": True}]])
+    #     # re-add traces from the existing fig dictionary
+    #     for trace in figdict["data"]:
+    #         is_secondary = trace.get("yaxis", "y") == "y2"  # Check if trace belongs to secondary y-axis
+    #         fig.add_trace(go.Scatter(**trace), secondary_y=is_secondary)
+    #     # Apply previous layout settings
+    #     fig.update_layout(**figdict["layout"])
+        
+    #     update_flexgraph_full(store, n2t, opt = setup_options["graph2"], fig = fig, graph = 2) 
+    #     return no_update, fig 
+ 
+    # @app.callback(
+    #     [Output("graph3", "extendData"), Output("graph3", "figure")],
+    #     [Input("ud-interval-3", "n_intervals")],
+    #     [State("graph3", "figure")]
+    # )
+    # def update_graph3_combined(n, figdict):
+    #     do_full_update = False
+    #     i = 1
+    #     for key in setup_options["graph3"].keys(): # just find if update is necessary
+    #         if do_full_update is True:
+    #             break # no need to ckeck the other traces, full update is due anyways
+    #         if "trace" not in key:
+    #             continue
+    #         if store[f"g{3}_t{i}_ymin"] != store[f"g{3}_t{i}_yminnew"]:
+    #             do_full_update = True
+    #         if store[f"g{3}_t{i}_ymax"] != store[f"g{3}_t{i}_ymaxnew"]:
+    #             do_full_update = True
+    #         i += 1
+        
+    #     do_full_update = False # debug
+    #     if do_full_update is False:
+    #         extend = update_flexgraph_extend(store, n2t, opt = setup_options["graph3"], graph = 3)
+    #         return extend, no_update
+        
+    #     fig = make_subplots(specs=[[{"secondary_y": True}]])
+    #     # re-add traces from the existing fig dictionary
+    #     for trace in figdict["data"]:
+    #         is_secondary = trace.get("yaxis", "y") == "y2"  # Check if trace belongs to secondary y-axis
+    #         fig.add_trace(go.Scatter(**trace), secondary_y=is_secondary)
+    #     # Apply previous layout settings
+    #     fig.update_layout(**figdict["layout"])
+        
+    #     update_flexgraph_full(store, n2t, opt = setup_options["graph3"], fig = fig, graph = 3) 
+    #     return no_update, fig
+
+
     @app.callback(
         Output("graph4", "figure"),
         Input("graph4-slider", "value")

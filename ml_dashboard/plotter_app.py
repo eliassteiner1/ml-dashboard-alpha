@@ -52,17 +52,20 @@ class DashPlotter:
                 if "trace" not in keyK:
                     continue # skipt the "options" part for each graph
                 # all the data needs to have a "None" so that the legends show up even when data is empty
-                store[f"g{j}_t{k}_x"]    = [None]
-                store[f"g{j}_t{k}_y"]    = [None]
-                store[f"g{j}_t{k}_ymin"] =  float("inf")
-                store[f"g{j}_t{k}_ymax"] = -float("inf")
-                store[f"g{j}_t{k}_CHKP"] = 1 # start checkpoint at 1 because of the initial none value
+                store[f"g{j}_t{k}_x"]       = [None]
+                store[f"g{j}_t{k}_y"]       = [None]
+                store[f"g{j}_t{k}_ymin"]    = float("inf")
+                store[f"g{j}_t{k}_yminnew"] = float("inf")
+                store[f"g{j}_t{k}_ymax"]    = -float("inf")
+                store[f"g{j}_t{k}_ymaxnew"] = -float("inf")
+                store[f"g{j}_t{k}_CHKP"]    = 1 # start checkpoint at 1 because of the initial none value
                 
                 if self._setup_options[keyJ][keyK]["E"] is True:
                     store[f"g{j}_t{k}_lo"] = [None]
                     store[f"g{j}_t{k}_hi"] = [None]
 
                 k +=1
+            
             k  = 1
             j += 1
         
@@ -102,8 +105,8 @@ class DashPlotter:
         self._store[f"g{graph}_t{trace}_x"].append(x)
         self._store[f"g{graph}_t{trace}_y"].append(y)
         
-        self._store[f"g{graph}_t{trace}_ymax"] = max(self._store[f"g{graph}_t{trace}_ymax"], y)
-        self._store[f"g{graph}_t{trace}_ymin"] = min(self._store[f"g{graph}_t{trace}_ymin"], y)
+        self._store[f"g{graph}_t{trace}_ymaxnew"] = max(self._store[f"g{graph}_t{trace}_ymaxnew"], y)
+        self._store[f"g{graph}_t{trace}_yminnew"] = min(self._store[f"g{graph}_t{trace}_yminnew"], y)
         
         if (lo is not None) and (hi is not None):
             self._store[f"g{graph}_t{trace}_lo"].append(y-lo)

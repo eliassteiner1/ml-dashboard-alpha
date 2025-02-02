@@ -673,7 +673,72 @@ def make_pcagraph(store: dict, n2t: dict, opt: dict):
         
     return [_make_pcagraph_step(LL_x, LL_y, LL_z, res, PV_x, PV_y, step = i) for i in range(n_steps)]
 
-def update_flexgraph(store: dict, n2t: dict, opt: dict, fig: go.Figure, graph: int):
+
+def update_flexgraph_extend(store: dict, n2t: dict, opt: dict, graph: int):
+    """
+    store : reference to the plotter object store
+    n2t   : reference to hte plotter object mapping between trace numbers and some more useful names
+    opt   : is just the graphX dict (with options and traces), not the whole setup_options!
+    graph : graph number
+    """
+    
+    extendData   = {
+        "x": [],
+        "y": [],
+    }
+    extendTraces = []
+    extendMax    = {
+        "x": [],
+        "y": [],
+    }
+    
+    i = 1
+    for key in opt.keys(): # loop over all traceX in a graph -------------------
+        if "trace" not in key:
+            continue # skip the option key
+        
+        chkp = store[f"g{graph}_t{i}_CHKP"] # up to this index the data has already been plotted
+        if len(store[f"g{graph}_t{i}_x"]) == chkp:
+            i += 1 # -----------------------------------------------------------
+            continue
+
+        # update data MAIN traces ----------------------------------------------
+        extendData["x"].append(store[f"g{graph}_t{i}_x"][chkp:]) # actual data extension
+        extendData["y"].append(store[f"g{graph}_t{i}_y"][chkp:]) # actual data extension
+        extendTraces.append(n2t[f"g{graph}"][f"t{i}_main"]) # trace nr key for extend data
+        extendMax["x"].append(None) # no max points shown limit
+        extendMax["y"].append(None) # no max points shown limit
+        
+        # update data ERROR traces ---------------------------------------------
+        if opt[key]["E"] is True:
+            # lo trace
+            extendData["x"].append(store[f"g{graph}_t{i}_x"][chkp:])
+            extendData["y"].append(store[f"g{graph}_t{i}_lo"][chkp:])
+            extendTraces.append(n2t[f"g{graph}"][f"t{i}_lo"])
+            extendMax["x"].append(None)
+            extendMax["y"].append(None)
+            # hi trace
+            extendData["x"].append(store[f"g{graph}_t{i}_x"][chkp:])
+            extendData["y"].append(store[f"g{graph}_t{i}_hi"][chkp:])
+            extendTraces.append(n2t[f"g{graph}"][f"t{i}_hi"])
+            extendMax["x"].append(None)
+            extendMax["y"].append(None)
+        
+        # update ENDPOINTS -----------------------------------------------------
+        if opt[key]["P"] is True:
+            extendData["x"].append([store[f"g{graph}_t{i}_x"][-1]] * 2)
+            extendData["y"].append([store[f"g{graph}_t{i}_y"][-1]] * 2)
+            extendTraces.append(n2t[f"g{graph}"][f"t{i}_end"])
+            extendMax["x"].append(2) # needs 2 because the endpoint is two overlaid markers!
+            extendMax["y"].append(2)
+         
+        # ----------------------------------------------------------------------    
+        store[f"g{graph}_t{i}_CHKP"] = len(store[f"g{graph}_t{i}_x"])
+        i += 1 
+    
+    return [extendData, extendTraces, extendMax]
+
+def update_flexgraph_full(store: dict, n2t: dict, opt: dict, fig: go.Figure, graph: int):
     """
     store : reference to the plotter object store
     n2t   : reference to hte plotter object mapping between trace numbers and some more useful names
@@ -708,7 +773,8 @@ def update_flexgraph(store: dict, n2t: dict, opt: dict, fig: go.Figure, graph: i
             
             # only possible if the trace data is more than: [None]. Account for initial "None" when doing min! > ([1:])
             if len(store[f"g{graph}_t{i}_y"]) > 1:                
-                best = min(store[f"g{graph}_t{i}_y"][1:]) #TODO replace this to use ymin!! (currently inefficient)
+                best = store[f"g{graph}_t{i}_yminnew"]
+                # best = min(store[f"g{graph}_t{i}_y"][1:]) #TODO replace this to use ymin!! (currently inefficient)
                 
                 fig.data[n2t[f"g{graph}"][f"t{i}_best"]].x = [0, (1 + paddx) * total]
                 fig.data[n2t[f"g{graph}"][f"t{i}_best"]].y = [best, best]
@@ -762,7 +828,10 @@ def update_flexgraph(store: dict, n2t: dict, opt: dict, fig: go.Figure, graph: i
             else:
                 graphmax_sc.append(store[f"g{graph}_t{i}_ymax"])
                 graphmin_sc.append(store[f"g{graph}_t{i}_ymin"])
-
+              
+        store[f"g{graph}_t{i}_ymin"] = store[f"g{graph}_t{i}_yminnew"] # useful only for the extend method 
+        store[f"g{graph}_t{i}_ymax"] = store[f"g{graph}_t{i}_ymaxnew"] # useful only for the extend method 
+        store[f"g{graph}_t{i}_CHKP"] = len(store[f"g{graph}_t{i}_x"])  # useful only for the extend method 
         i += 1 # ---------------------------------------------------------------
     
     # update range constraints of whole graph ----------------------------------
