@@ -1,3 +1,10 @@
+
+
+
+
+
+
+
 # from dash import Dash, dcc, html, Input, Output, no_update
 # import plotly.graph_objects as go
 # import numpy as np
@@ -50,8 +57,20 @@ app = Dash(__name__)
 
 # Initial figure with one empty trace
 fig = go.Figure()
-fig.add_trace(go.Scatter(x=[None], y=[None], mode="lines", name="sin"))
-fig.add_trace(go.Scatter(x=[None], y=[None], mode="lines", name="cos"))
+fig.add_trace(go.Scatter(
+    x=[None], 
+    y=[None],
+    mode="markers", 
+    name="sin",
+    marker     = dict(
+        size       = [10, 20], 
+        opacity    = [0.5, 1], 
+        symbol     = ["circle", "circle"], 
+        line_width = [0, 0]
+    ),
+    
+    ))
+fig.add_trace(go.Scatter(x=[None], y=[None], mode="markers", name="cos"))
 
 # App layout
 app.layout = html.Div([
@@ -88,7 +107,7 @@ def update_graph(n_intervals):
         # "x" list of lists [[data for t1], [data for t2]]
         # "y" list of lists [[data for t1], [data for t2]]
         # second part: [list of trace indices]
-        return {"x": [x_new_1, x_new_2], "y": [y_new_1, y_new_2]}, [0, 1]  # Append to trace 0
+        return {"x": [x_new_1, x_new_2], "y": [y_new_1, y_new_2]}, [0, 1], 2  # Append to trace 0
     return no_update
 
 # Run the app

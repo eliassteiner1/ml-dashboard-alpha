@@ -16,7 +16,7 @@ if __name__ == "__main__":
                 "showbest": "trace2",
                 "total"   : total,
             },
-            "trace1" : {"N": "loss_train", "C": "firebrick", "T": None, "E": True, "P": True, "S": "spline"},
+            "trace1" : {"N": "loss_train", "C": "firebrick", "T": None, "E": True, "P": True, "S": "linear"},
             "trace2" : {"N": "loss_valid", "C": "seagreen",  "T": None, "E": False, "P": True, "S": "linear"},
         },
         "graph2": {
