@@ -365,6 +365,8 @@ def make_flexgraph(store: dict, n2t: dict, opt: dict, graph: int):
         )
         return fig
     
+    
+    
     # -------------------------------------------------------- create figure
     fig = _init_fig(opt)
     # ----------------------------------------------------------- add traces
@@ -672,7 +674,6 @@ def make_pcagraph(store: dict, n2t: dict, opt: dict):
     PV_y = store[f"g{4}_PV_y"]
         
     return [_make_pcagraph_step(LL_x, LL_y, LL_z, res, PV_x, PV_y, step = i) for i in range(n_steps)]
-
 
 def update_flexgraph_extend(store: dict, n2t: dict, opt: dict, graph: int):
     """

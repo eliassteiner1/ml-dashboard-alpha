@@ -149,7 +149,8 @@ class DashPlotter:
             jupyter_mode = "tab", # also has "inline" ... 
             port         = port, 
             debug        = True, 
-            use_reloader = False)
+            use_reloader = False # this is necessary, because hot reload is not possible in daemon thread 
+            )
     
     def run_script(self, host: str = "127.0.0.1", port: int = 8050):
         """For running the plotter in a script. Uses a daemon thread to avoid the app from blocking the script. Use run_script_spin a the end of the script to keep the app thread alive and be able to interact with data."""
@@ -158,8 +159,8 @@ class DashPlotter:
             self._app.run_server(
                 host         = host,
                 port         = port,     
-                debug        = True,     
-                use_reloader = False  
+                debug        = True,      
+                use_reloader = False # this is necessary, because hot reload is not possible in daemon thread 
             )
         threading.Thread(target = _run, daemon = True).start()
 
