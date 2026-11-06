@@ -1,3 +1,6 @@
+#  I think this was the final exploration that lead me to go to a totally different version of the project. I discovered, that it's actually possible to extend the existing traces, instead of redrawing frequently, thus making it wayyyy more efficient. Also it's possible to restyle and change a lot of properties on the existing graph in dash+plotly.
+
+
 from dash import Dash, dcc, html, Input, Output, no_update
 import plotly.graph_objects as go
 import numpy as np
@@ -63,10 +66,10 @@ def update_graph(n_intervals):
 
 # Run the app
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run(debug=True)
     
     
-    
+
     
     
     

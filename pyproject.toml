@@ -1,0 +1,25 @@
+[project]
+name = "ml-dashboard-alpha"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "dash>=4.5.0",
+    "dash-bootstrap-components>=2.0.4",
+    "h5py>=3.16.0",
+    "ipykernel>=7.4.0",
+    "matplotlib>=3.11.2",
+    "nbformat>=5.11.1",
+    "numpy>=2.5.4",
+    "plotly>=7.1.0",
+    "torch>=2.15.0",
+    "tqdm>=4.70.1",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu134"
+url = "https://download.pytorch.org/whl/cu134"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu134" }
+torchvision = { index = "pytorch-cu134" }

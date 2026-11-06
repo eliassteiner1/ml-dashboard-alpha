@@ -144,7 +144,7 @@ class DashPlotter:
     def run_jupyter(self, host: str = "127.0.0.1", port: int = 8050):
         """For running the plotter in a Jupyter notebook. Handles all the threading and keeping alive automatically."""
         
-        self._app.run_server(
+        self._app.run(
             host         = host, 
             jupyter_mode = "tab", # also has "inline" ... 
             port         = port, 
@@ -156,7 +156,7 @@ class DashPlotter:
         """For running the plotter in a script. Uses a daemon thread to avoid the app from blocking the script. Use run_script_spin a the end of the script to keep the app thread alive and be able to interact with data."""
         
         def _run():   
-            self._app.run_server(
+            self._app.run(
                 host         = host,
                 port         = port,     
                 debug        = True,      
